@@ -4,6 +4,9 @@ import pygame
 import sys
 import random
 import time
+import json
+import datetime
+import os
 
 check_errors = pygame.init()
 if check_errors[1] > 0:
@@ -11,6 +14,7 @@ if check_errors[1] > 0:
     sys.exit(-1)
 else:
     print("(+) PyGame successfully initialized!")
+    name = input("Say your name: ")
 
 
 # Colors
@@ -94,7 +98,7 @@ def indexFunction():
         snakeBody.insert(0, list(snakePos))
         if snakePos[0] == foodPos[0] and snakePos[1] == foodPos[1]:
             score += 1
-            if score == fpsSpeed * 2:
+            if score % 5 == 0:
                 fpsSpeed *= 2
             foodSpawn = False
         else:
@@ -138,6 +142,8 @@ def gameOver(score):
     GOrect = GOsurf.get_rect()
     GOrect.midtop = (360, 15)
     playSurface.blit(GOsurf, GOrect)
+    saveRanking(score)
+    showRanking()
     showScore(score, 0)
     pygame.display.flip()
     time.sleep(3)
@@ -151,8 +157,46 @@ def showScore(score, choice=1):
     if choice == 1:
         Srect.midtop = (80, 10)
     else:
-        Srect.midtop = (360, 120)
+        Srect.midtop = (360, 70)
     playSurface.blit(Ssurf, Srect)
+
+
+def saveRanking(score):
+    file = open("scoreRanking.txt", "r")
+    ranking = []
+
+    if os.stat("scoreRanking.txt").st_size > 0:
+        ranking = json.loads(file.read())
+        file.close()
+
+    date = datetime.datetime.now().strftime('%Y-%m-%d')
+    newScore = {"name": name, "date": date, "score": score}
+    ranking.append(newScore)
+
+    file = open("scoreRanking.txt", "w")
+    file.write(json.dumps(ranking))
+    file.close()
+
+
+def showRanking():
+    file = open("scoreRanking.txt", "r")
+    sortedList = sorted(json.loads(file.read()), key=lambda k: k['score'],
+                        reverse=True)
+    file.close()
+
+    sFont = pygame.font.SysFont('monaco', 21)
+    posY = 120
+    i = 0
+    for v in sortedList:
+        if(i < 5):
+            ranking = '{0} - {1}  {2}  {3}'.format(i+1, v['score'], v['date'], v['name'])
+            Ssurf = sFont.render('{0}'.format(ranking), True, white)
+            Srect = Ssurf.get_rect()
+            Srect.midtop = (360, posY)
+            Srect.midleft = (280, posY)
+            posY = posY + (2 * 21)
+            i += 1
+            playSurface.blit(Ssurf, Srect)
 
 
 indexFunction()
