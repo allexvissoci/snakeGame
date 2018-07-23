@@ -30,7 +30,7 @@ playSurface = pygame.display.set_mode((720, 460))
 def indexFunction():
     # Play surface
     score = 0
-    fpsSpeed = 5
+    fpsSpeed = 10
     pause = False
     pygame.display.set_caption('Snake game!')
 
@@ -56,12 +56,16 @@ def indexFunction():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT or event.key == ord('d'):
                     changeto = 'RIGHT'
+                    fpsSpeed *= 2
                 if event.key == pygame.K_LEFT or event.key == ord('a'):
                     changeto = 'LEFT'
+                    fpsSpeed *= 2
                 if event.key == pygame.K_UP or event.key == ord('w'):
                     changeto = 'UP'
+                    fpsSpeed *= 2
                 if event.key == pygame.K_DOWN or event.key == ord('s'):
                     changeto = 'DOWN'
+                    fpsSpeed *= 2
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
                 if event.key == pygame.K_SPACE:
@@ -73,6 +77,9 @@ def indexFunction():
                                 if pause:
                                     pause = False
                                     break
+            elif event.type == pygame.KEYUP:
+                fpsSpeed /= 2
+            fpsController.tick(fpsSpeed)
 
         # Validation of direction
         if changeto == 'RIGHT' and not direction == 'LEFT':
@@ -99,7 +106,7 @@ def indexFunction():
         if snakePos[0] == foodPos[0] and snakePos[1] == foodPos[1]:
             score += 1
             if score % 5 == 0:
-                fpsSpeed *= 2
+                fpsSpeed += fpsSpeed * 0.1
             foodSpawn = False
         else:
             snakeBody.pop()
